@@ -4,3 +4,9 @@ version = "0.1.0"
 authors = ["Elichai Turkel <elichai.turkel@gmail.com>"]
 
 [dependencies]
+
+
+
+[features]
+default = ["u128"]
+u128 = []
