@@ -109,6 +109,84 @@ impl GenerateRand for u128 {
     }
 }
 
+impl GenerateRand for char {
+    fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
+        loop {
+            if let Some(c) = char::from_u32(rand.get_u32()) {
+                return c;
+            }
+        }
+    }
+}
+
+impl GenerateRand for bool {
+    fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
+        rand.get_bool()
+    }
+}
+
+
+// Source: https://mumble.net/~campbell/2014/04/28/uniform-random-float
+// https://mumble.net/~campbell/2014/04/28/random_real.c
+impl GenerateRand for f64 {
+    fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
+        let mut exponent: i32 = -64;
+        let mut significand = rand.get_u64();
+        while significand == 0 {
+            exponent -= 64;
+            if exponent < -1074i32 { // emin(-1022)-p(53)+1  (https://en.wikipedia.org/wiki/IEEE_754)
+                // In reallity this should probably never happen. prob of ~1/(2^1024) unless randomness is broken.
+                unreachable!("The randomness is broken, got 0 16 times. (prob of 1/2^1024)");
+            }
+            significand = rand.get_u64();
+        }
+
+        // Shift the leading zeros into the exponent
+        let shift = significand.leading_zeros() as i32;
+        if shift > 0 {
+            exponent -= shift;
+            significand <<= shift;
+            significand |= rand.get_u64() >> (64 - shift);
+        }
+        // Set the sticky bit.
+        significand |= 1;
+
+        // Convert to float and scale by 2^exponent.
+        significand as f64 * f64::from(1 << exponent)
+    }
+}
+
+// Source: https://mumble.net/~campbell/2014/04/28/uniform-random-float
+// https://mumble.net/~campbell/2014/04/28/random_real.c
+impl GenerateRand for f32 {
+    fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
+        let mut exponent: i16  = -32;
+        let mut significand = rand.get_u32();
+        while significand == 0 {
+            exponent -= 32;
+            if exponent < -149i16 { // emin(-126)-p(24)+1  (https://en.wikipedia.org/wiki/IEEE_754)
+                // In reallity this should probably never happen. prob of ~1/(2^1024) unless randomness is broken.
+                unreachable!("The randomness is broken, got 0 5 times. (prob of 1/2^160)");
+                // TODO: Should this stay unreachable or change to return 0?
+            }
+            significand = rand.get_u32();
+        }
+
+        // Shift the leading zeros into the exponent
+        let shift = significand.leading_zeros() as i16;
+        if shift > 0 {
+            exponent -= shift;
+            significand <<= shift;
+            significand |= rand.get_u32() >> (32 - shift);
+        }
+        // Set the sticky bit, almost definitely another 1 in the random stream.
+        significand |= 1;
+
+        // Convert to float and scale by 2^exponent.
+        significand as f32 * f32::from(1i16 << exponent)
+    }
+}
+
 
 impl_generate_rand_ifromu!{i8, u8}
 impl_generate_rand_ifromu!{i16, u16}
