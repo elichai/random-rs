@@ -10,7 +10,7 @@ keywords = ["rand", "random", "random-rs", "rng"]
 
 
 [dependencies]
-random-trait = { path = "../random-trait" }
+random-trait = { version = "0.1", path = "../random-trait" }
 
 doc-comment = { version = "0.3", optional = true }
 
