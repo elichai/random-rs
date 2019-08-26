@@ -14,6 +14,11 @@
 
 use core::{char, mem};
 
+#[cfg(feature = "doc-comment")]
+extern crate doc_comment;
+#[cfg(feature = "doc-comment")]
+doc_comment::doctest!("../README.md");
+
 /// This trait is used by `Random::gen()` as a generic function to create a random value for any type which implements it.
 /// I try to give by default implementations for all the types in libcore, including arrays and tuples, if anything is missing please raise the issue.
 /// You can implement this for any of your types.
