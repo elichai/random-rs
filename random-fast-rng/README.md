@@ -1,5 +1,4 @@
 # random-random-fast-rng
-[![Build Status](https://travis-ci.org/elichai/random-fast-rng.svg?branch=master)](https://travis-ci.org/elichai/random-fast-rng)
 [![Latest version](https://img.shields.io/crates/v/random-fast-rng.svg)](https://crates.io/crates/random-fast-rng)
 [![Documentation](https://docs.rs/random-fast-rng/badge.svg)](https://docs.rs/random-fast-rng)
 ![License](https://img.shields.io/crates/l/random-fast-rng.svg)

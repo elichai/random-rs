@@ -1,5 +1,4 @@
 # random-trait
-[![Build Status](https://travis-ci.org/elichai/random-trait.svg?branch=master)](https://travis-ci.org/elichai/random-trait)
 [![Latest version](https://img.shields.io/crates/v/random-trait.svg)](https://crates.io/crates/random-trait)
 [![Documentation](https://docs.rs/random-trait/badge.svg)](https://docs.rs/random-trait)
 ![License](https://img.shields.io/crates/l/random-trait.svg)

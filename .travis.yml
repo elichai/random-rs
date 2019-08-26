@@ -7,7 +7,6 @@ cache:
     - ./fast-rng/target
 os:
   - linux
-  - windows
   - osx
 rust:
   - stable

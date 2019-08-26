@@ -20,4 +20,4 @@ default = ["std"]
 std = []
 
 [badges]
-travis-ci = { repository = "elichai/random-fast-rng" }
+travis-ci = { repository = "elichai/random-rs" }

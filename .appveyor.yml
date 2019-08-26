@@ -191,4 +191,6 @@ test_script:
 cache:
   - 'C:\Users\appveyor\.cargo'
   - 'C:\Users\appveyor\.rustup'
+  - 'random-trait\target'
+  - 'random-fast-rng\target'
   - 'target'

@@ -16,4 +16,4 @@ u128 = []
 
 
 [badges]
-travis-ci = { repository = "elichai/random-trait" }
+travis-ci = { repository = "elichai/random-rs" }
