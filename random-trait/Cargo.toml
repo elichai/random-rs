@@ -8,6 +8,11 @@ description = "Rust library for a random trait meant to produce random generic t
 categories = ["algorithms", "no-std", "development-tools::testing", "cryptography"]
 keywords = ["rand", "random", "random-rs", "rng"]
 
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+]
+
 [dependencies]
 doc-comment = { version = "0.3", optional = true }
 

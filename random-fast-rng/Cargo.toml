@@ -8,6 +8,10 @@ description = "Rust library for Blazing fast non cryptographic random number gen
 categories = ["algorithms", "no-std", "development-tools::testing"]
 keywords = ["rand", "random", "random-rs", "rng"]
 
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+]
 
 [dependencies]
 random-trait = { version = "0.1", path = "../random-trait" }

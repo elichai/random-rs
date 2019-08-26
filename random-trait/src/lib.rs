@@ -6,10 +6,12 @@
 //! # Random Trait
 //!
 //! This crate provides a simple thin trait for producing generic random values based on any random source.
-//! The crates assurances are based on the assurances of the RNG it is implemented on.
+//! The crates assurances are based on the assurances of the RNG it is implemented on.<br>
 //! if that RNG is cryptographically secure then this crate should provide a cryptographically secure numbers. (including floats)
 //! if the RNG is biased (which is fine for tests and some other applications) then the results will also be bias.
-//! This crate *does not* try to compensate for biases in the RNG source.
+//! This crate **does not** try to compensate for biases in the RNG source.
+//!
+//! please see the [`GenerateRand`](trait.GenerateRand.html) and [`Random`](trait.Random.html) for more information and examples.
 //!
 
 use core::{char, mem};
@@ -36,6 +38,7 @@ doc_comment::doctest!("../README.md");
 ///     }
 /// }
 /// ```
+///
 pub trait GenerateRand {
     /// Generate a random value, using the `rand` as source of randomness.
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self;
@@ -80,6 +83,7 @@ pub trait GenerateRand {
 /// assert_eq!(rand_u32, 117835012);
 /// # }
 /// ```
+///
 pub trait Random {
     /// The Error type, based on the source of randomness, non fallible sources can use `Error=()`
     type Error;

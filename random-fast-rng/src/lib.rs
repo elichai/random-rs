@@ -1,4 +1,19 @@
 #![no_std]
+#![deny(missing_docs)]
+#![cfg_attr(test, deny(warnings))]
+
+//! # Random-fast-rng
+//!
+//! This crate provides a fast **non cryptographic** random number generator that implements the [`Random`](trait.Random.html) trait. <br>
+//! Currently it's implemented using the `Pcg32` algorithm, that generates 32 bit of random data for every state change. <br>
+//! the exact algorithm might change in the future, but the properties should stay the same (Blazing fast, non cryptographic, and minimal I/O)
+//! The crate is part of the `random-rs` facade, and as such supports older rust compilers(currently 1.13+) and should have only thin amount of dependencies.
+//!
+//! This Random generator is good for testing uses, and use cases that require some non-determinism. it shouldn't be used to generate keys/passwords. <br>
+//!
+//! By enabling the `std` feature this crate exposes a [`new()`](struct.FastRng.html#method.new) function that uses [`SystemTime::now()`](https://doc.rust-lang.org/std/time/struct.SystemTime.html) to seed the RNG.<br>
+//! It also exposes a [`local_rng()`](fn.local_rng.html) function to give a persistent Rng that is seeded only once and is unique per thread (so there's no need to worry about dropping and reinitializing the Rng)
+//!
 
 #[cfg(feature = "std")]
 #[macro_use]
@@ -24,29 +39,34 @@ doc_comment::doctest!("../README.md");
 
 const PCG_DEFAULT_MULTIPLIER_64: u64 = 6_364_136_223_846_793_005;
 
-// Pcg32
+/// A FastRng struct implementing [`Random`](trait.Random.html). you can initialize it with your own seed using [`FastRng::seed()`](struct.FastRng.html#method.seed)
+/// Or if the `std` feature is enabled call [`FastRng::new()`](struct.FastRng.html#method.seed) which will seed it with the system time. <br>
+/// For ergonomics and ease of usability the Rng is also provided as a global thread local variable using [`FastRng::local_rng()`](fn.local_rng.html)
 pub struct FastRng {
+    // Pcg32
     state: u64,
     inc: u64,
 }
 
 impl FastRng {
+    /// Creates a new instance of `FastRng` seeded with the system time.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use random_fast_rng::{FastRng, Random};
+    ///
+    /// let mut rng = FastRng::new();
+    /// let random_u8 = rng.get_u8();
+    /// let arr: [u8; 32] = rng.gen();
+    /// ```
+    ///
     #[cfg(feature = "std")]
     pub fn new() -> Self {
         let (a, b) = time_seed();
         Self::seed(a, b)
     }
 
-    #[cfg(feature = "std")]
-    pub fn thread_local() -> ThreadFastRng {
-        use std::cell::RefCell;
-        thread_local! {
-            pub static THREAD_FAST_RNG: RefCell<FastRng> = RefCell::new(FastRng::new());
-        }
-        let ptr = THREAD_FAST_RNG.with(|r| r.as_ptr());
-        ThreadFastRng::from_ptr(ptr)
-    }
-
+    /// A function to manually seed the Rng in `no-std` cases.
     pub fn seed(seed: u64, seq: u64) -> Self {
         let init_inc = (seq << 1) | 1;
         let init_state = seed + init_inc;
@@ -63,6 +83,26 @@ impl FastRng {
         let rot = (old_state >> 59) as i32;
         (xorshift >> rot) | (xorshift << ((-rot) & 31))
     }
+}
+
+/// Returns a thread local instance which is seeded only once per thread (no need to worry about dropping and reinitializing)
+///
+/// # Examples
+/// ```rust
+/// use random_fast_rng::{Random, local_rng};
+///
+/// let random_u8 = local_rng().get_u8();
+/// let arr: [u8; 32] = local_rng().gen();
+/// ```
+///
+#[cfg(feature = "std")]
+pub fn local_rng() -> ThreadFastRng {
+    use std::cell::RefCell;
+    thread_local! {
+        pub static THREAD_FAST_RNG: RefCell<FastRng> = RefCell::new(FastRng::new());
+    }
+    let ptr = THREAD_FAST_RNG.with(|r| r.as_ptr());
+    ThreadFastRng::from_ptr(ptr)
 }
 
 #[cfg(feature = "std")]
@@ -96,7 +136,7 @@ mod tests {
 
     #[test]
     fn test_local() {
-        let mut local_rng = FastRng::thread_local();
+        let mut local_rng = local_rng();
         let a: u64 = local_rng.gen();
         let b: u32 = local_rng.gen();
         let c: [u8; 64] = local_rng.gen();

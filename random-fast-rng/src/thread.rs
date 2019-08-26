@@ -2,6 +2,9 @@ use FastRng;
 
 use core::ops::{Deref, DerefMut};
 
+/// A shim that points to the global `FastRng` instance. isn't safe for multi-threading.
+///
+/// This struct is created by [`thread_local()`](../struct.FastRng.html#method.thread_local)
 pub struct ThreadFastRng(*mut FastRng);
 
 impl Deref for ThreadFastRng {
