@@ -1,10 +1,15 @@
 #![no_std]
 
 #[cfg(feature = "std")]
-extern crate std;
+#[macro_use] extern crate std;
+
+#[cfg(feature = "std")] mod thread;
 
 pub extern crate random_trait;
 pub use random_trait::Random;
+
+#[cfg(feature = "std")] use thread::FromRawPtr;
+#[cfg(feature = "std")] pub use thread::ThreadFastRng;
 
 use core::mem;
 
@@ -12,6 +17,7 @@ use core::mem;
 extern crate doc_comment;
 #[cfg(feature = "doc-comment")]
 doc_comment::doctest!("../README.md");
+
 
 const PCG_DEFAULT_MULTIPLIER_64: u64 = 6_364_136_223_846_793_005;
 
@@ -27,6 +33,17 @@ impl FastRng {
         let (a, b) = time_seed();
         Self::seed(a, b)
     }
+
+    #[cfg(feature = "std")]
+    pub fn thread_local() -> ThreadFastRng {
+        use std::cell::RefCell;
+        thread_local! {
+            pub static THREAD_FAST_RNG: RefCell<FastRng> = RefCell::new(FastRng::new());
+        }
+        let ptr = THREAD_FAST_RNG.with(|r| r.as_ptr());
+        ThreadFastRng::from_ptr(ptr)
+    }
+
 
     pub fn seed(seed: u64, seq: u64) -> Self {
         let init_inc = (seq << 1) | 1;
@@ -68,5 +85,31 @@ impl Random for FastRng {
     }
     fn get_u32(&mut self) -> u32 {
         self.gen_u32()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_local() {
+        let mut local_rng = FastRng::thread_local();
+        let a: u64 = local_rng.gen();
+        let b: u32 = local_rng.gen();
+        let c: [u8; 64] = local_rng.gen();
+        assert_ne!(a, 0);
+        assert_ne!(b, 0);
+        assert_ne!(&c[..], &[0u8; 64][..]);
+    }
+
+    #[test]
+    fn test_float() {
+        let mut rng = FastRng::new();
+        let f: f32 = rng.gen();
+        assert!(f > 0.0 && f < 1.0);
+        let f: f64 = rng.gen();
+        assert!(f > 0.0 && f < 1.0);
+
     }
 }
