@@ -252,7 +252,7 @@ impl GenerateRand for f64 {
         significand |= 1;
 
         // Convert to float and scale by 2^exponent.
-        significand as f64 * f64::from(1 << exponent)
+        significand as f64 * (1.0 / 2u64.pow(exponent.abs() as u32) as f64)
     }
 }
 
@@ -260,11 +260,11 @@ impl GenerateRand for f64 {
 // https://mumble.net/~campbell/2014/04/28/random_real.c
 impl GenerateRand for f32 {
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
-        let mut exponent: i16 = -32;
+        let mut exponent: i32 = -32;
         let mut significand = rand.get_u32();
         while significand == 0 {
             exponent -= 32;
-            if exponent < -149i16 {
+            if exponent < -149i32 {
                 // emin(-126)-p(24)+1  (https://en.wikipedia.org/wiki/IEEE_754)
                 // In reallity this should probably never happen. prob of ~1/(2^1024) unless randomness is broken.
                 unreachable!("The randomness is broken, got 0 5 times. (prob of 1/2^160)");
@@ -274,7 +274,7 @@ impl GenerateRand for f32 {
         }
 
         // Shift the leading zeros into the exponent
-        let shift = significand.leading_zeros() as i16;
+        let shift = significand.leading_zeros() as i32;
         if shift > 0 {
             exponent -= shift;
             significand <<= shift;
@@ -284,7 +284,7 @@ impl GenerateRand for f32 {
         significand |= 1;
 
         // Convert to float and scale by 2^exponent.
-        significand as f32 * f32::from(1i16 << exponent)
+        significand as f32 * (1.0 / 2u32.pow(exponent.abs() as u32) as f32)
     }
 }
 

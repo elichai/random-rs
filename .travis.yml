@@ -43,17 +43,19 @@ before_script:
       cd "${TRAVIS_BUILD_DIR}/random-trait"
       rustup component add clippy-preview rustfmt;
       cargo fmt --all -- --check;
-      cargo clippy -- -D clippy::all;
+      cargo clippy --all-targets --all-features -- -D clippy::all;
+
       cd "${TRAVIS_BUILD_DIR}/random-fast-rng"
       rustup component add clippy-preview rustfmt;
       cargo fmt --all -- --check;
-      cargo clippy -- -D clippy::all -A clippy::new-without-default;
+      cargo clippy --all-targets --all-features -- -D warnings -A clippy::new-without-default;
     fi
   - if [ ${TRAVIS_RUST_VERSION} == "nightly" ]; then
       cd "${TRAVIS_BUILD_DIR}/random-trait"
       rustup component add miri;
       cargo miri setup;
       cargo miri test -- -- -Zunstable-options --exclude-should-panic;
+
       cd "${TRAVIS_BUILD_DIR}/random-fast-rng"
       rustup component add miri;
       cargo miri setup;

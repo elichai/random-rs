@@ -6,7 +6,7 @@ license = "MIT/Apache-2.0"
 readme = "README.md"
 description = "Rust library for Blazing fast non cryptographic random number generator"
 categories = ["algorithms", "no-std", "development-tools::testing"]
-keywods = ["rand", "random", "random-rs", "rng"]
+keywords = ["rand", "random", "random-rs", "rng"]
 
 
 [dependencies]

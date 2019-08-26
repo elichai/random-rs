@@ -1,15 +1,19 @@
 #![no_std]
 
 #[cfg(feature = "std")]
-#[macro_use] extern crate std;
+#[macro_use]
+extern crate std;
 
-#[cfg(feature = "std")] mod thread;
+#[cfg(feature = "std")]
+mod thread;
 
 pub extern crate random_trait;
 pub use random_trait::Random;
 
-#[cfg(feature = "std")] use thread::FromRawPtr;
-#[cfg(feature = "std")] pub use thread::ThreadFastRng;
+#[cfg(feature = "std")]
+use thread::FromRawPtr;
+#[cfg(feature = "std")]
+pub use thread::ThreadFastRng;
 
 use core::mem;
 
@@ -17,7 +21,6 @@ use core::mem;
 extern crate doc_comment;
 #[cfg(feature = "doc-comment")]
 doc_comment::doctest!("../README.md");
-
 
 const PCG_DEFAULT_MULTIPLIER_64: u64 = 6_364_136_223_846_793_005;
 
@@ -44,18 +47,17 @@ impl FastRng {
         ThreadFastRng::from_ptr(ptr)
     }
 
-
     pub fn seed(seed: u64, seq: u64) -> Self {
         let init_inc = (seq << 1) | 1;
         let init_state = seed + init_inc;
         let mut rng = FastRng { state: init_state, inc: init_inc };
-        rng.state = rng.state * PCG_DEFAULT_MULTIPLIER_64 + rng.inc;
+        rng.state = rng.state.wrapping_mul(PCG_DEFAULT_MULTIPLIER_64).wrapping_add(rng.inc);
         rng
     }
 
     fn gen_u32(&mut self) -> u32 {
         let old_state = self.state;
-        self.state = self.state * PCG_DEFAULT_MULTIPLIER_64 + self.inc;
+        self.state = self.state.wrapping_mul(PCG_DEFAULT_MULTIPLIER_64).wrapping_add(self.inc);
 
         let xorshift = (((old_state >> 18) ^ old_state) >> 27) as u32;
         let rot = (old_state >> 59) as i32;
@@ -110,6 +112,5 @@ mod tests {
         assert!(f > 0.0 && f < 1.0);
         let f: f64 = rng.gen();
         assert!(f > 0.0 && f < 1.0);
-
     }
 }

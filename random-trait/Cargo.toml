@@ -6,7 +6,7 @@ license = "MIT/Apache-2.0"
 readme = "README.md"
 description = "Rust library for a random trait meant to produce random generic types"
 categories = ["algorithms", "no-std", "development-tools::testing", "cryptography"]
-keywods = ["rand", "random", "random-rs", "rng"]
+keywords = ["rand", "random", "random-rs", "rng"]
 
 [dependencies]
 doc-comment = { version = "0.3", optional = true }
