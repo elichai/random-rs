@@ -1,4 +1,5 @@
 #![no_std]
+#![recursion_limit = "130"]
 
 use core::{char, mem};
 
@@ -62,22 +63,6 @@ pub trait Random {
     }
 }
 
-
-// Will overflow(i.e. sign extend) correctly https://doc.rust-lang.org/nomicon/casts.html.
-// should only be used with the same type.
-macro_rules! impl_generate_rand_ifromu {
-    ($ity:ty, $uty: ty) => {
-        impl GenerateRand for $ity {
-            #[inline]
-            fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
-                debug_assert_eq!(mem::size_of::<$ity>(), mem::size_of::<$uty>());
-                <$uty>::generate(rand) as $ity
-            }
-        }
-    }
-}
-
-
 impl GenerateRand for u8 {
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
         rand.get_u8()
@@ -125,7 +110,6 @@ impl GenerateRand for bool {
     }
 }
 
-
 // Source: https://mumble.net/~campbell/2014/04/28/uniform-random-float
 // https://mumble.net/~campbell/2014/04/28/random_real.c
 impl GenerateRand for f64 {
@@ -134,7 +118,8 @@ impl GenerateRand for f64 {
         let mut significand = rand.get_u64();
         while significand == 0 {
             exponent -= 64;
-            if exponent < -1074i32 { // emin(-1022)-p(53)+1  (https://en.wikipedia.org/wiki/IEEE_754)
+            if exponent < -1074i32 {
+                // emin(-1022)-p(53)+1  (https://en.wikipedia.org/wiki/IEEE_754)
                 // In reallity this should probably never happen. prob of ~1/(2^1024) unless randomness is broken.
                 unreachable!("The randomness is broken, got 0 16 times. (prob of 1/2^1024)");
             }
@@ -160,11 +145,12 @@ impl GenerateRand for f64 {
 // https://mumble.net/~campbell/2014/04/28/random_real.c
 impl GenerateRand for f32 {
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
-        let mut exponent: i16  = -32;
+        let mut exponent: i16 = -32;
         let mut significand = rand.get_u32();
         while significand == 0 {
             exponent -= 32;
-            if exponent < -149i16 { // emin(-126)-p(24)+1  (https://en.wikipedia.org/wiki/IEEE_754)
+            if exponent < -149i16 {
+                // emin(-126)-p(24)+1  (https://en.wikipedia.org/wiki/IEEE_754)
                 // In reallity this should probably never happen. prob of ~1/(2^1024) unless randomness is broken.
                 unreachable!("The randomness is broken, got 0 5 times. (prob of 1/2^160)");
                 // TODO: Should this stay unreachable or change to return 0?
@@ -187,10 +173,45 @@ impl GenerateRand for f32 {
     }
 }
 
+// Will overflow(i.e. sign extend) correctly https://doc.rust-lang.org/nomicon/casts.html.
+// should only be used with the same type.
+macro_rules! impl_generate_rand_ifromu {
+    ($ity:ty, $uty: ty) => {
+        impl GenerateRand for $ity {
+            #[inline]
+            fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
+                debug_assert_eq!(mem::size_of::<$ity>(), mem::size_of::<$uty>());
+                <$uty>::generate(rand) as $ity
+            }
+        }
+    };
+}
 
-impl_generate_rand_ifromu!{i8, u8}
-impl_generate_rand_ifromu!{i16, u16}
-impl_generate_rand_ifromu!{i32, u32}
-impl_generate_rand_ifromu!{i64, u64}
+impl_generate_rand_ifromu! {i8, u8}
+impl_generate_rand_ifromu! {i16, u16}
+impl_generate_rand_ifromu! {i32, u32}
+impl_generate_rand_ifromu! {i64, u64}
 #[cfg(feature = "u128")]
-impl_generate_rand_ifromu!{i128, u128}
+impl_generate_rand_ifromu! {i128, u128}
+
+// the reason for both $t and $ts is that this way each iteration it's reducing the amount of variables by one
+macro_rules! array_impls {
+    {$N:expr, $t:ident $($ts:ident)*} => {
+            impl<T: GenerateRand> GenerateRand for [T; $N] {
+                #[inline]
+                fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
+                    [rand.gen::<$t>(), $(rand.gen::<$ts>()),*]
+                }
+            }
+            array_impls!{($N - 1), $($ts)*}
+    };
+    {$N:expr,} => {
+        impl<T: GenerateRand> GenerateRand for [T; $N] {
+            fn generate<R: Random + ?Sized>(_: &mut R) -> Self { [] }
+        }
+    };
+}
+
+#[rustfmt::skip]
+array_impls! {128, T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T
+                   T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T}
