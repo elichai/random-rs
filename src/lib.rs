@@ -64,24 +64,28 @@ pub trait Random {
 }
 
 impl GenerateRand for u8 {
+    #[inline]
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
         rand.get_u8()
     }
 }
 
 impl GenerateRand for u16 {
+    #[inline]
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
         rand.get_u16()
     }
 }
 
 impl GenerateRand for u32 {
+    #[inline]
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
         rand.get_u32()
     }
 }
 
 impl GenerateRand for u64 {
+    #[inline]
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
         rand.get_u64()
     }
@@ -89,12 +93,14 @@ impl GenerateRand for u64 {
 
 #[cfg(feature = "u128")]
 impl GenerateRand for u128 {
+    #[inline]
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
         rand.get_u128()
     }
 }
 
 impl GenerateRand for char {
+    #[inline]
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
         loop {
             if let Some(c) = char::from_u32(rand.get_u32()) {
@@ -105,6 +111,7 @@ impl GenerateRand for char {
 }
 
 impl GenerateRand for bool {
+    #[inline]
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
         rand.get_bool()
     }
@@ -207,6 +214,7 @@ macro_rules! array_impls {
     };
     {$N:expr,} => {
         impl<T: GenerateRand> GenerateRand for [T; $N] {
+            #[inline]
             fn generate<R: Random + ?Sized>(_: &mut R) -> Self { [] }
         }
     };
@@ -215,3 +223,39 @@ macro_rules! array_impls {
 #[rustfmt::skip]
 array_impls! {128, T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T
                    T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T}
+
+
+
+macro_rules! tuple_impls {
+    ($(
+        ($($T:ident),+),
+    )+) => {
+        $(
+            impl<$($T: GenerateRand),+> GenerateRand for ($($T,)+) {
+                #[inline]
+                fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
+                    ($({ let x: $T = rand.gen(); x},)+)
+                }
+            }
+        )+
+    }
+}
+
+tuple_impls! {
+    (A),
+    (A, B),
+    (A, B, C),
+    (A, B, C, D),
+    (A, B, C, D, E),
+    (A, B, C, D, E, F),
+    (A, B, C, D, E, F, G),
+    (A, B, C, D, E, F, G, H),
+    (A, B, C, D, E, F, G, H, I),
+    (A, B, C, D, E, F, G, H, I, J),
+    (A, B, C, D, E, F, G, H, I, J, K),
+    (A, B, C, D, E, F, G, H, I, J, K, L),
+    (A, B, C, D, E, F, G, H, I, J, K, L, M),
+    (A, B, C, D, E, F, G, H, I, J, K, L, M, N),
+    (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O),
+    (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P),
+}
