@@ -1,6 +1,10 @@
 language: rust
 sudo: false
-cache: cargo
+cache:
+  cargo: true
+  directories:
+    - ./random-trait/target
+    - ./fast-rng/target
 os:
   - linux
   - windows
@@ -23,17 +27,34 @@ rust:
   - 1.36.0
 
 script:
+  - cd "${TRAVIS_BUILD_DIR}/random-trait"
   - cargo build --verbose
   - cargo test --verbose
   - if [ ${TRAVIS_RUST_VERSION} == "stable" ]; then cargo test --features=doc-comment; fi
 
+  - cd "${TRAVIS_BUILD_DIR}/fast-rng"
+  - cargo build --verbose
+  - cargo test --verbose
+  - if [ ${TRAVIS_RUST_VERSION} == "stable" ]; then cargo test --features=doc-comment; fi
+
+
 before_script:
   - if [ ${TRAVIS_RUST_VERSION} == "stable" ]; then
+      cd "${TRAVIS_BUILD_DIR}/random-trait"
+      rustup component add clippy-preview rustfmt;
+      cargo fmt --all -- --check;
+      cargo clippy -- -D clippy::all;
+      cd "${TRAVIS_BUILD_DIR}/fast-rng"
       rustup component add clippy-preview rustfmt;
       cargo fmt --all -- --check;
       cargo clippy -- -D clippy::all;
     fi
   - if [ ${TRAVIS_RUST_VERSION} == "nightly" ]; then
+      cd "${TRAVIS_BUILD_DIR}/random-trait"
+      rustup component add miri;
+      cargo miri setup;
+      cargo miri test -- -- -Zunstable-options --exclude-should-panic;
+      cd "${TRAVIS_BUILD_DIR}/fast-rng"
       rustup component add miri;
       cargo miri setup;
       cargo miri test -- -- -Zunstable-options --exclude-should-panic;

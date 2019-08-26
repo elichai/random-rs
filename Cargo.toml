@@ -1,10 +1,5 @@
-[package]
-name = "random-trait"
-version = "0.1.0"
-authors = ["Elichai Turkel <elichai.turkel@gmail.com>"]
-
-[dependencies]
-doc-comment = { version = "0.3", optional = true }
-
-[features]
-u128 = []
+[workspace]
+members = [
+    "random-trait",
+    "fast-rng",
+]
