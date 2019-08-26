@@ -2,9 +2,18 @@
 name = "random-trait"
 version = "0.1.0"
 authors = ["Elichai Turkel <elichai.turkel@gmail.com>"]
+license = "MIT/Apache-2.0"
+readme = "README.md"
+description = "Rust library for a random trait meant to produce random generic types"
+categories = ["algorithms", "no-std", "development-tools::testing", "cryptography"]
+keywods = ["rand", "random", "random-rs", "rng"]
 
 [dependencies]
 doc-comment = { version = "0.3", optional = true }
 
 [features]
 u128 = []
+
+
+[badges]
+travis-ci = { repository = "elichai/random-trait" }

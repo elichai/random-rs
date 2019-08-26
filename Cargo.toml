@@ -1,5 +1,5 @@
 [workspace]
 members = [
     "random-trait",
-    "fast-rng",
+    "random-fast-rng",
 ]

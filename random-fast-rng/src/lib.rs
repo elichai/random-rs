@@ -52,7 +52,7 @@ fn time_seed() -> (u64, u64) {
     let now = time::SystemTime::now();
     let unix = now.duration_since(time::UNIX_EPOCH).unwrap();
 
-    (unix.as_secs(), unix.subsec_nanos() as u64)
+    (unix.as_secs(), u64::from(unix.subsec_nanos()))
 }
 
 impl Random for FastRng {

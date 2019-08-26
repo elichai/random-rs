@@ -32,7 +32,7 @@ script:
   - cargo test --verbose
   - if [ ${TRAVIS_RUST_VERSION} == "stable" ]; then cargo test --features=doc-comment; fi
 
-  - cd "${TRAVIS_BUILD_DIR}/fast-rng"
+  - cd "${TRAVIS_BUILD_DIR}/random-fast-rng"
   - cargo build --verbose
   - cargo test --verbose
   - if [ ${TRAVIS_RUST_VERSION} == "stable" ]; then cargo test --features=doc-comment; fi
@@ -44,17 +44,17 @@ before_script:
       rustup component add clippy-preview rustfmt;
       cargo fmt --all -- --check;
       cargo clippy -- -D clippy::all;
-      cd "${TRAVIS_BUILD_DIR}/fast-rng"
+      cd "${TRAVIS_BUILD_DIR}/random-fast-rng"
       rustup component add clippy-preview rustfmt;
       cargo fmt --all -- --check;
-      cargo clippy -- -D clippy::all;
+      cargo clippy -- -D clippy::all -A clippy::new-without-default;
     fi
   - if [ ${TRAVIS_RUST_VERSION} == "nightly" ]; then
       cd "${TRAVIS_BUILD_DIR}/random-trait"
       rustup component add miri;
       cargo miri setup;
       cargo miri test -- -- -Zunstable-options --exclude-should-panic;
-      cd "${TRAVIS_BUILD_DIR}/fast-rng"
+      cd "${TRAVIS_BUILD_DIR}/random-fast-rng"
       rustup component add miri;
       cargo miri setup;
       cargo miri test -- -- -Zunstable-options --exclude-should-panic;

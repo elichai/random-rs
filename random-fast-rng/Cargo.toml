@@ -1,0 +1,23 @@
+[package]
+name = "random-fast-rng"
+version = "0.1.0"
+authors = ["Elichai Turkel <elichai.turkel@gmail.com>"]
+license = "MIT/Apache-2.0"
+readme = "README.md"
+description = "Rust library for Blazing fast non cryptographic random number generator"
+categories = ["algorithms", "no-std", "development-tools::testing"]
+keywods = ["rand", "random", "random-rs", "rng"]
+
+
+[dependencies]
+random-trait = { path = "../random-trait" }
+
+doc-comment = { version = "0.3", optional = true }
+
+
+[features]
+default = ["std"]
+std = []
+
+[badges]
+travis-ci = { repository = "elichai/random-fast-rng" }
