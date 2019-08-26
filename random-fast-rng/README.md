@@ -22,7 +22,7 @@ random-fast-rng = "0.1"
 # Examples
 
 ```rust
-use fast_rng::{FastRng, Random};
+use random_fast_rng::{FastRng, Random};
 
 fn do_something() {
     let mut rng = FastRng::new();
