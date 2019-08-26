@@ -234,7 +234,7 @@ impl GenerateRand for f64 {
         while significand == 0 {
             exponent -= 64;
             if exponent < -1074i32 {
-                // emin(-1022)-p(53)+1  (https://en.wikipedia.org/wiki/IEEE_754)
+                // E min(-1022)-p(53)+1  (https://en.wikipedia.org/wiki/IEEE_754)
                 // In reallity this should probably never happen. prob of ~1/(2^1024) unless randomness is broken.
                 unreachable!("The randomness is broken, got 0 16 times. (prob of 1/2^1024)");
             }
@@ -252,7 +252,7 @@ impl GenerateRand for f64 {
         significand |= 1;
 
         // Convert to float and scale by 2^exponent.
-        significand as f64 * (1.0 / 2u64.pow(exponent.abs() as u32) as f64)
+        significand as f64 * exp2(exponent)
     }
 }
 
@@ -265,7 +265,7 @@ impl GenerateRand for f32 {
         while significand == 0 {
             exponent -= 32;
             if exponent < -149i32 {
-                // emin(-126)-p(24)+1  (https://en.wikipedia.org/wiki/IEEE_754)
+                // E min(-126)-p(24)+1  (https://en.wikipedia.org/wiki/IEEE_754)
                 // In reallity this should probably never happen. prob of ~1/(2^1024) unless randomness is broken.
                 unreachable!("The randomness is broken, got 0 5 times. (prob of 1/2^160)");
                 // TODO: Should this stay unreachable or change to return 0?
@@ -275,7 +275,7 @@ impl GenerateRand for f32 {
 
         // Shift the leading zeros into the exponent
         let shift = significand.leading_zeros() as i32;
-        if shift > 0 {
+        if shift != 0 {
             exponent -= shift;
             significand <<= shift;
             significand |= rand.get_u32() >> (32 - shift);
@@ -284,8 +284,21 @@ impl GenerateRand for f32 {
         significand |= 1;
 
         // Convert to float and scale by 2^exponent.
-        significand as f32 * (1.0 / 2u32.pow(exponent.abs() as u32) as f32)
+        significand as f32 * exp2f(exponent)
     }
+}
+
+/// This is from IEEE-754.
+/// you take the E max, subtract the exponent from it, and shift it according to the precision-1
+fn exp2f(exp: i32) -> f32 {
+    debug_assert!(exp > -127);
+    let bits = ((127i32 + exp) as u32) << 23u32;
+    unsafe { mem::transmute(bits) } // this is the same as `f32::from_bits`
+}
+fn exp2(exp: i32) -> f64 {
+    debug_assert!(exp > -1023);
+    let bits = ((1023i32 + exp) as u64) << 52u64;
+    unsafe { mem::transmute(bits) } // this is the same as `f64::from_bits`
 }
 
 // Will overflow(i.e. sign extend) correctly https://doc.rust-lang.org/nomicon/casts.html.

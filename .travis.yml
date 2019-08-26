@@ -43,12 +43,12 @@ before_script:
       cd "${TRAVIS_BUILD_DIR}/random-trait"
       rustup component add clippy-preview rustfmt;
       cargo fmt --all -- --check;
-      cargo clippy --all-targets --all-features -- -D clippy::all;
+      cargo clippy --all-targets --all-features -- -Dwarnings -Aclippy::transmute_int_to_float -Aclippy::new-without-default;
 
       cd "${TRAVIS_BUILD_DIR}/random-fast-rng"
       rustup component add clippy-preview rustfmt;
       cargo fmt --all -- --check;
-      cargo clippy --all-targets --all-features -- -D warnings -A clippy::new-without-default;
+      cargo clippy --all-targets --all-features -- -Dwarnings -Aclippy::transmute_int_to_float -Aclippy::new-without-default;
     fi
   - if [ ${TRAVIS_RUST_VERSION} == "nightly" ]; then
       cd "${TRAVIS_BUILD_DIR}/random-trait"
