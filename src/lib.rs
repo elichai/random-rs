@@ -1,68 +1,147 @@
 #![no_std]
 #![recursion_limit = "130"]
 
+//! # Random Trait
+//!
+//! This crate provides a simple thin trait for producing generic random values based on any random source.
+//! The crates assurances are based on the assurances of the RNG it is implemented on.
+//! if that RNG is cryptographically secure then this crate should provide a cryptographically secure numbers. (including floats)
+//! if the RNG is biased (which is fine for tests and some other applications) then the results will also be bias.
+//! This crate *does not* try to compensate for biases in the RNG source.
+//!
+
 use core::{char, mem};
 
-pub enum Error {
-    Something,
-}
 
+/// This trait is used by `Random::gen()` as a generic function to create a random value for any type which implements it.
+/// I try to give by default implementations for all the types in libcore, including arrays and tuples, if anything is missing please raise the issue.
+/// You can implement this for any of your types.
+/// # Examples
+/// ```rust
+/// use random_trait::{Random, GenerateRand};
+/// struct MyStuff{
+///     a: u64,
+///     b: char,
+/// }
+///
+/// impl GenerateRand for MyStuff {
+///     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
+///         MyStuff {a: rand.gen(), b: rand.gen() }
+///     }
+/// }
+/// ```
 pub trait GenerateRand {
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self;
 }
 
+///
+/// This is the base trait of the crate. By implementing the required method on your random generator source
+/// it will give you a long list of functions, the important of them is `Random::gen() -> T` which will produce a random value
+/// for every type which implements `GenerateRand` (you can implement this for your own types).
+///
+/// Notice that some random sources can produce non byte-array values with more efficiency, so if you want to use that
+/// you can just override a provided method and use the random source directly.
+///
+/// If your random source is fallable in a way that can be handled please also implement `fill_bytes` and handle the errors properly.
+/// otherwise it will panic.
+///
+/// # Example
+/// ```rust
+/// use random_trait::{Random, GenerateRand};
+///
+/// #[derive(Default)]
+/// struct MyRandomGenerator {
+///     ctr: usize,
+/// }
+///
+/// impl Random for MyRandomGenerator {
+///     type Error = ();
+///     fn try_fill_bytes(&mut self, buf: &mut [u8]) -> Result<(), Self::Error> {
+///         for e in buf.iter_mut() {
+///             *e = self.ctr as u8;
+///             self.ctr += 1;
+///         }
+///         Ok(())
+///     }
+/// }
+///
+/// # fn main() {
+/// let mut rand = MyRandomGenerator::default();
+/// let rand_u32: u32 = rand.gen();
+/// assert_eq!(rand_u32, 50462976);
+/// let rand_u32: u32 = rand.gen();
+/// assert_eq!(rand_u32, 117835012);
+/// # }
+/// ```
 pub trait Random {
-    fn try_fill_bytes(&mut self, buf: &mut [u8]) -> Result<(), Error>;
+    /// The Error type, based on the source of randomness, non fallible sources can use `Error=()`
+    type Error;
 
+    /// This is the main method of the trait.
+    /// You should implement this on your randomness source and will the buffer with random data.
+    fn try_fill_bytes(&mut self, buf: &mut [u8]) -> Result<(), Self::Error>;
+
+
+    /// Uses `try_fill_bytes` but panics if returns an error.
+    /// Override if you can gracefully handle errors in the randomness source.
     fn fill_bytes(&mut self, buf: &mut [u8]) {
         if self.try_fill_bytes(buf).is_err() {
             panic!("Failed getting randmness");
         }
     }
 
+    /// Returns a generic random value which implements `GenerateRand`
     fn gen<T: GenerateRand>(&mut self) -> T {
         T::generate(self)
     }
 
+    /// Returns a random `u8` number.
     fn get_u8(&mut self) -> u8 {
         let mut buf = [0u8; 1];
         self.fill_bytes(&mut buf);
         buf[0]
     }
 
+    /// Returns a random `u16` number.
     fn get_u16(&mut self) -> u16 {
         let mut buf = [0u8; 2];
         self.fill_bytes(&mut buf);
         unsafe { mem::transmute(buf) }
     }
 
+    /// Returns a random `u32` number.
     fn get_u32(&mut self) -> u32 {
         let mut buf = [0u8; 4];
         self.fill_bytes(&mut buf);
         unsafe { mem::transmute(buf) }
     }
 
+    /// Returns a random `u64` number.
     fn get_u64(&mut self) -> u64 {
         let mut buf = [0u8; 8];
         self.fill_bytes(&mut buf);
         unsafe { mem::transmute(buf) }
     }
 
+    /// Returns a random `usize` number.
     #[cfg(target_pointer_width = "64")]
     fn get_usize(&mut self) -> usize {
         self.get_u64() as usize
     }
 
+    /// Returns a random `usize` number.
     #[cfg(target_pointer_width = "32")]
     fn get_usize(&mut self) -> usize {
         self.get_u32() as usize
     }
 
+    /// Returns a random `usize` number.
     #[cfg(target_pointer_width = "16")]
     fn get_usize(&mut self) -> usize {
         self.get_u16() as usize
     }
 
+    /// Returns a random `u128` number.
     #[cfg(feature = "u128")]
     fn get_u128(&mut self) -> u128 {
         let mut buf = [0u8; 16];
@@ -70,8 +149,9 @@ pub trait Random {
         unsafe { mem::transmute(buf) }
     }
 
-    // TODO: More research, least/most significant bit?
+    /// Returns a random `bool` with 50/50 probability.
     fn get_bool(&mut self) -> bool {
+        // TODO: More research, least/most significant bit?
         let bit = self.get_u8() & 0b1000_0000;
         debug_assert!(bit < 2);
         bit == 1
