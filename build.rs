@@ -10,13 +10,18 @@ fn main() {
 }
 
 fn rustc_version() -> Option<u32> {
-    let rustc = env::var_os("RUSTC")?;
-    let output = Command::new(rustc).arg("--version").output().ok()?;
-    let version = str::from_utf8(&output.stdout).ok()?;
-    let mut pieces = version.split('.');
-    if pieces.next() != Some("rustc 1") {
-        return None;
+    if let Some(rustc) = env::var_os("RUSTC") {
+        if let Some(output) = Command::new(rustc).arg("--version").output().ok() {
+            if let Some(version) = str::from_utf8(&output.stdout).ok() {
+                let mut pieces = version.split('.');
+                if pieces.next() != Some("rustc 1") {
+                    return None;
+                }
+                if let Some(piece) = pieces.next() {
+                    return piece.parse().ok();
+                }
+            }
+        }
     }
-    let minor = pieces.next()?.parse().ok()?;
-    Some(minor)
+    return None;
 }
