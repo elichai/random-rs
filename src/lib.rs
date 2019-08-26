@@ -48,6 +48,21 @@ pub trait Random {
         unsafe { mem::transmute(buf) }
     }
 
+    #[cfg(target_pointer_width = "64")]
+    fn get_usize(&mut self) -> usize {
+        self.get_u64() as usize
+    }
+
+    #[cfg(target_pointer_width = "32")]
+    fn get_usize(&mut self) -> usize {
+        self.get_u32() as usize
+    }
+
+    #[cfg(target_pointer_width = "16")]
+    fn get_usize(&mut self) -> usize {
+        self.get_u16() as usize
+    }
+
     #[cfg(feature = "u128")]
     fn get_u128(&mut self) -> u128 {
         let mut buf = [0u8; 16];
@@ -88,6 +103,13 @@ impl GenerateRand for u64 {
     #[inline]
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
         rand.get_u64()
+    }
+}
+
+impl GenerateRand for usize {
+    #[inline]
+    fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
+        rand.get_usize()
     }
 }
 
@@ -198,6 +220,7 @@ impl_generate_rand_ifromu! {i8, u8}
 impl_generate_rand_ifromu! {i16, u16}
 impl_generate_rand_ifromu! {i32, u32}
 impl_generate_rand_ifromu! {i64, u64}
+impl_generate_rand_ifromu! {isize, usize}
 #[cfg(feature = "u128")]
 impl_generate_rand_ifromu! {i128, u128}
 
@@ -223,8 +246,6 @@ macro_rules! array_impls {
 #[rustfmt::skip]
 array_impls! {128, T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T
                    T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T T}
-
-
 
 macro_rules! tuple_impls {
     ($(
