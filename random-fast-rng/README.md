@@ -2,7 +2,6 @@
 [![Latest version](https://img.shields.io/crates/v/random-fast-rng.svg)](https://crates.io/crates/random-fast-rng)
 [![Documentation](https://docs.rs/random-fast-rng/badge.svg)](https://docs.rs/random-fast-rng)
 ![License](https://img.shields.io/crates/l/random-fast-rng.svg)
-[![dependency status](https://deps.rs/repo/github/elichai/random-fast-rng/status.svg)](https://deps.rs/repo/github/elichai/random-fast-rng)
 
 A Rust library [random-fast-rng](https://crates.io/crates/random-fast-rng) That helps generate **non-cryptographic** blazing fast randomness.
 

@@ -1,12 +1,13 @@
 [package]
 name = "random-trait"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Elichai Turkel <elichai.turkel@gmail.com>"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
 description = "Rust library for a random trait meant to produce random generic types"
 categories = ["algorithms", "no-std", "development-tools::testing", "cryptography"]
 keywords = ["rand", "random", "random-rs", "rng"]
+repository = "https://github.com/elichai/random-rs"
 
 include = [
     "**/*.rs",
@@ -22,3 +23,4 @@ u128 = []
 
 [badges]
 travis-ci = { repository = "elichai/random-rs" }
+appveyor = { repository = "elichai/random-rs" }

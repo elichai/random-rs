@@ -2,7 +2,6 @@
 [![Latest version](https://img.shields.io/crates/v/random-trait.svg)](https://crates.io/crates/random-trait)
 [![Documentation](https://docs.rs/random-trait/badge.svg)](https://docs.rs/random-trait)
 ![License](https://img.shields.io/crates/l/random-trait.svg)
-[![dependency status](https://deps.rs/repo/github/elichai/random-trait/status.svg)](https://deps.rs/repo/github/elichai/random-trait)
 
 A Rust library [random-trait](https://crates.io/crates/random-trait) that helps generating random values in an easy and convinient way 
 while still being a very thin library without dependencies.
