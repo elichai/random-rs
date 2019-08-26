@@ -1,5 +1,7 @@
 #![no_std]
 #![recursion_limit = "130"]
+#![deny(missing_docs)]
+#![cfg_attr(test, deny(warnings))]
 
 //! # Random Trait
 //!
@@ -11,7 +13,6 @@
 //!
 
 use core::{char, mem};
-
 
 /// This trait is used by `Random::gen()` as a generic function to create a random value for any type which implements it.
 /// I try to give by default implementations for all the types in libcore, including arrays and tuples, if anything is missing please raise the issue.
@@ -31,6 +32,7 @@ use core::{char, mem};
 /// }
 /// ```
 pub trait GenerateRand {
+    /// Generate a random value, using the `rand` as source of randomness.
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self;
 }
 
@@ -80,7 +82,6 @@ pub trait Random {
     /// This is the main method of the trait.
     /// You should implement this on your randomness source and will the buffer with random data.
     fn try_fill_bytes(&mut self, buf: &mut [u8]) -> Result<(), Self::Error>;
-
 
     /// Uses `try_fill_bytes` but panics if returns an error.
     /// Override if you can gracefully handle errors in the randomness source.
