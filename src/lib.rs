@@ -18,14 +18,12 @@ extern crate doc_comment;
 #[cfg(feature = "doc-comment")]
 doc_comment::doctest!("../README.md");
 
-
 #[cfg(feature = "std")]
 #[macro_use]
 extern crate std as core;
 
 pub mod fast;
 use core::{char, mem};
-
 
 /// This trait is used by `Random::gen()` as a generic function to create a random value for any type which implements it.
 /// I try to give by default implementations for all the types in libcore, including arrays and tuples, if anything is missing please raise the issue.

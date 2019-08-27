@@ -68,7 +68,12 @@ fn get_random_u128() -> u128 {
 
 Or use a provided RNG:
 ```rust
-use random_rs::{Random, fast::FastRng};
+use random_rs::{GenerateRand, Random, fast::FastRng};
+struct MyStuff {
+    a: u64,
+    b: char,
+}
+
 impl GenerateRand for MyStuff {
     fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
         MyStuff {a: rand.gen(), b: rand.gen() }

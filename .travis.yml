@@ -23,36 +23,18 @@ rust:
   - 1.36.0
 
 script:
-  - cd "${TRAVIS_BUILD_DIR}/random-trait"
+  - cargo build --verbose --no-default-features
   - cargo build --verbose
   - cargo test --verbose
   - if [ ${TRAVIS_RUST_VERSION} == "stable" ]; then cargo test --features=doc-comment; fi
-
-  - cd "${TRAVIS_BUILD_DIR}/random-fast-rng"
-  - cargo build --verbose
-  - cargo test --verbose
-  - if [ ${TRAVIS_RUST_VERSION} == "stable" ]; then cargo test --features=doc-comment; fi
-
 
 before_script:
   - if [ ${TRAVIS_RUST_VERSION} == "stable" ]; then
-      cd "${TRAVIS_BUILD_DIR}/random-trait"
-      rustup component add clippy-preview rustfmt;
-      cargo fmt --all -- --check;
-      cargo clippy --all-targets --all-features -- -Dwarnings -Aclippy::transmute_int_to_float -Aclippy::new-without-default;
-
-      cd "${TRAVIS_BUILD_DIR}/random-fast-rng"
       rustup component add clippy-preview rustfmt;
       cargo fmt --all -- --check;
       cargo clippy --all-targets --all-features -- -Dwarnings -Aclippy::transmute_int_to_float -Aclippy::new-without-default;
     fi
 #  - if [ ${TRAVIS_RUST_VERSION} == "nightly" ]; then
-#      cd "${TRAVIS_BUILD_DIR}/random-trait"
-#      rustup component add miri;
-#      cargo miri setup;
-#      cargo miri test -- -- -Zunstable-options --exclude-should-panic;
-#
-#      cd "${TRAVIS_BUILD_DIR}/random-fast-rng"
 #      rustup component add miri;
 #      cargo miri setup;
 #      cargo miri test -- -- -Zunstable-options --exclude-should-panic;

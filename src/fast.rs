@@ -11,8 +11,7 @@
 //!
 
 use core::mem;
-use ::Random;
-
+use Random;
 
 const PCG_DEFAULT_MULTIPLIER_64: u64 = 6_364_136_223_846_793_005;
 
@@ -31,7 +30,8 @@ impl FastRng {
     ///
     /// # Examples
     /// ```rust
-    /// use random_rs::{FastRng, Random};
+    /// use random_rs::Random;
+    /// use random_rs::fast::FastRng;
     ///
     /// let mut rng = FastRng::new();
     /// let random_u8 = rng.get_u8();
@@ -72,7 +72,8 @@ impl FastRng {
 ///
 /// # Examples
 /// ```rust
-/// use random_rs::{Random, local_rng};
+/// use random_rs::Random;
+/// use random_rs::fast::local_rng;
 ///
 /// let random_u8 = local_rng().get_u8();
 /// let arr: [u8; 32] = local_rng().gen();
@@ -113,7 +114,6 @@ impl Random for FastRng {
     }
 }
 
-
 #[cfg(feature = "std")]
 mod thread {
     use super::FastRng;
@@ -150,10 +150,10 @@ mod thread {
     }
 }
 
-#[cfg(feature = "std")] pub use self::thread::ThreadFastRng;
-#[cfg(feature = "std")] use self::thread::FromRawPtr;
-
-
+#[cfg(feature = "std")]
+use self::thread::FromRawPtr;
+#[cfg(feature = "std")]
+pub use self::thread::ThreadFastRng;
 
 #[cfg(test)]
 mod tests {
