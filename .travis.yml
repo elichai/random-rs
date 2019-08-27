@@ -1,12 +1,9 @@
 language: rust
 sudo: false
-cache:
-  cargo: true
-  directories:
-    - ./random-trait/target
-    - ./fast-rng/target
+cache: false
 os:
   - linux
+  - windows
   - osx
 rust:
   - stable

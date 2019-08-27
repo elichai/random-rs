@@ -85,11 +85,12 @@ pub trait GenerateRand {
 /// ```
 ///
 pub trait Random {
+    // TODO: Bechmark transmuting vs bit shifting.
     /// The Error type, based on the source of randomness, non fallible sources can use `Error=()`
     type Error;
 
     /// This is the main method of the trait.
-    /// You should implement this on your randomness source and will the buffer with random data.
+    /// You should implement this on your randomness source and fill the buffer with random data.
     fn try_fill_bytes(&mut self, buf: &mut [u8]) -> Result<(), Self::Error>;
 
     /// Uses `try_fill_bytes` but panics if returns an error.
@@ -239,8 +240,8 @@ impl GenerateRand for f64 {
             exponent -= 64;
             if exponent < -1074i32 {
                 // E min(-1022)-p(53)+1  (https://en.wikipedia.org/wiki/IEEE_754)
-                // In reallity this should probably never happen. prob of ~1/(2^1024) unless randomness is broken.
-                unreachable!("The randomness is broken, got 0 16 times. (prob of 1/2^1024)");
+                // In reality this should probably never happen. prob of ~1/(2^1024) unless randomness is broken.
+                unreachable!("The randomness is broken, got 0, 16 times. (prob of 1/2^1024)");
             }
             significand = rand.get_u64();
         }

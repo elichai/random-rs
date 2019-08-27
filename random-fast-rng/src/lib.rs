@@ -41,7 +41,7 @@ const PCG_DEFAULT_MULTIPLIER_64: u64 = 6_364_136_223_846_793_005;
 
 /// A FastRng struct implementing [`Random`](trait.Random.html). you can initialize it with your own seed using [`FastRng::seed()`](struct.FastRng.html#method.seed)
 /// Or if the `std` feature is enabled call [`FastRng::new()`](struct.FastRng.html#method.seed) which will seed it with the system time. <br>
-/// For ergonomics and ease of usability the Rng is also provided as a global thread local variable using [`FastRng::local_rng()`](fn.local_rng.html)
+/// For ergonomics and ease of usability the Rng is also provided as a global thread local variable using [`local_rng()`](fn.local_rng.html)
 pub struct FastRng {
     // Pcg32
     state: u64,
@@ -67,6 +67,11 @@ impl FastRng {
     }
 
     /// A function to manually seed the Rng in `no-std` cases.
+    /// Ideally both the `seed` and the `seq` should be randcom numbers.
+    /// the `seed` represents the starting state of the algorithm,
+    /// and  the `seq` represents a constant random sequence that will be used to increment and re-randomize the state.
+    /// The exact usage of this numbers is not promised by the API, and might change.
+    /// as this is firstly a fast random generator, not a PCG random generator, and not a deterministic random generator.
     pub fn seed(seed: u64, seq: u64) -> Self {
         let init_inc = (seq << 1) | 1;
         let init_state = seed + init_inc;
