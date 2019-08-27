@@ -1,18 +1,83 @@
 # random-rs
-[![Build Status](https://travis-ci.org/elichai/random-rs.svg?branch=master)](https://travis-ci.org/elichai/random-rs)
-[![Build Status](https://ci.appveyor.com/api/projects/status/j6lo8inj8qp0xxgu?svg=true)](https://ci.appveyor.com/project/elichai/random-rs)
+[![Latest version](https://img.shields.io/crates/v/random-rs.svg)](https://crates.io/crates/random-rs)
+[![Documentation](https://docs.rs/random-rs/badge.svg)](https://docs.rs/random-rs)
+![License](https://img.shields.io/crates/l/random-rs.svg)
 
+A Rust library [random-rs](https://crates.io/crates/random-rs) that helps generating random values in an easy and convinient way 
+while still being a very thin library without dependencies.
 
-This repository is highly inspired by the [rand](http://crates.io/crates/rand) crate.
-But it plans to give something a bit different. this is meant to give a very minimalistic random generation with as little crates + code as possible.
-And keep backwards compatibily for as long as possible.
+This crate is inspired by the [rand](http://crates.io/crates/rand) crate, 
+but with the purpose of providing a very thin library, and support old compilers.
 
-## Rust version requirements
-`random-rs` is currently tested against rust 1.13.0. it might also support older compilers, but no promises.
-The plan is to keep supporting 1.13 as long as possible, in a case where a bump will be needed it will be accompanied by a major version bump.
+* [Documentation](https://docs.rs/random-rs)
 
-## Crates
- | name                                                 | version | purpose                                                    | algorithm                                                                                                                                        |
- |------------------------------------------------------|---------|------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
- | [random-trait](http://crates.io/crates/random-trait) | [![Latest version](https://img.shields.io/crates/v/random-trait.svg)](https://crates.io/crates/random-trait)  | The main trait, let's you randomly generate generic types  | The only part that requires a specific algorithm here is the floating points, using https://mumble.net/~campbell/2014/04/28/uniform-random-float |
- | [random-fast-rng](https://crates.io/crates/random-fast-rng) | [![Latest version](https://img.shields.io/crates/v/random-fast-rng.svg)](https://crates.io/crates/random-fast-rng)  | Blazing fast **non cryptographic** random number generator | Uses Pcg32 and seeds it from system time                                                                                                         |
+## Usage
+
+Add this to your `Cargo.toml`:
+
+```toml
+[dependencies]
+random-rs = "0.1"
+```
+
+After that the crate gives you a couple of options, you can Implement the `Random` trait for your source of randomness. <br>
+Or you can use use one of the provided RNGs which already implemenmt the trait. <br>
+Optionally you can also implement `GenerateRand` for your custom types so that the RNGs can create those for you.
+
+# Examples
+
+```rust
+use random_rs::{Random, GenerateRand};
+ #[derive(Default)]
+ struct MyRandomGenerator {
+     ctr: usize,
+ }
+
+ impl Random for MyRandomGenerator {
+     type Error = ();
+     fn try_fill_bytes(&mut self, buf: &mut [u8]) -> Result<(), Self::Error> {
+         for e in buf.iter_mut() {
+             *e = self.ctr as u8;
+             self.ctr += 1;
+         }
+         Ok(())
+     }
+ }
+
+struct MyStuff {
+    a: u64,
+    b: char,
+}
+
+impl GenerateRand for MyStuff {
+    fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
+        MyStuff {a: rand.gen(), b: rand.gen() }
+    }
+}
+
+fn get_random_stuff() -> MyStuff {
+    let mut rand = MyRandomGenerator::default();
+    rand.gen()
+}
+
+fn get_random_u128() -> u128 {
+    let mut rand = MyRandomGenerator::default();
+    rand.gen()
+}
+```
+
+Or use a provided RNG:
+```rust
+use random_rs::{Random, fast::FastRng};
+impl GenerateRand for MyStuff {
+    fn generate<R: Random + ?Sized>(rand: &mut R) -> Self {
+        MyStuff {a: rand.gen(), b: rand.gen() }
+    }
+}
+
+fn get_random_stuff() -> MyStuff {
+    let mut rand = FastRng::new();
+    rand.gen()
+}
+
+```

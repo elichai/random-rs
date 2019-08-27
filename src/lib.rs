@@ -1,4 +1,4 @@
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 #![recursion_limit = "130"]
 #![deny(missing_docs)]
 #![cfg_attr(test, deny(warnings))]
@@ -13,20 +13,26 @@
 //!
 //! please see the [`GenerateRand`](trait.GenerateRand.html) and [`Random`](trait.Random.html) for more information and examples.
 //!
-
-use core::{char, mem};
-
 #[cfg(feature = "doc-comment")]
 extern crate doc_comment;
 #[cfg(feature = "doc-comment")]
 doc_comment::doctest!("../README.md");
+
+
+#[cfg(feature = "std")]
+#[macro_use]
+extern crate std as core;
+
+pub mod fast;
+use core::{char, mem};
+
 
 /// This trait is used by `Random::gen()` as a generic function to create a random value for any type which implements it.
 /// I try to give by default implementations for all the types in libcore, including arrays and tuples, if anything is missing please raise the issue.
 /// You can implement this for any of your types.
 /// # Examples
 /// ```rust
-/// use random_trait::{Random, GenerateRand};
+/// use random_rs::{Random, GenerateRand};
 /// struct MyStuff{
 ///     a: u64,
 ///     b: char,
@@ -57,7 +63,7 @@ pub trait GenerateRand {
 ///
 /// # Example
 /// ```rust
-/// use random_trait::{Random, GenerateRand};
+/// use random_rs::{Random, GenerateRand};
 ///
 /// #[derive(Default)]
 /// struct MyRandomGenerator {

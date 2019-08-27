@@ -1,5 +1,27 @@
-[workspace]
-members = [
-    "random-trait",
-    "random-fast-rng",
+[package]
+name = "random-rs"
+version = "0.1.1"
+authors = ["Elichai Turkel <elichai.turkel@gmail.com>"]
+license = "MIT/Apache-2.0"
+readme = "README.md"
+description = "Rust library for random number generators"
+categories = ["algorithms", "no-std", "development-tools::testing", "cryptography"]
+keywords = ["rand", "random", "random-rs", "rng"]
+repository = "https://github.com/elichai/random-rs"
+
+include = [
+    "**/*.rs",
+    "Cargo.toml",
 ]
+
+[dependencies]
+doc-comment = { version = "0.3", optional = true }
+
+[features]
+default = ["std"]
+std = []
+u128 = []
+
+
+[badges]
+travis-ci = { repository = "elichai/random-rs" }
